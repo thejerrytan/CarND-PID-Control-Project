@@ -33,7 +33,15 @@ int main()
   uWS::Hub h;
 
   PID pid;
+  const double Kp = 1.0/5;
+  const double Ki = 0.005;
+  const double Kd = 5.0;
+  const double dp = 0.02;
+  const double di = 0.0005;
+  const double dd = 0.05;
+  const double tol = 0.01;
   // TODO: Initialize the pid variable.
+  pid.Init(Kp, Ki, Kd, dp, di, dd);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -50,20 +58,86 @@ int main()
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
-          double steer_value;
+          double steer_value, avg_error, throttle;
           /*
           * TODO: Calcuate steering value here, remember the steering value is
           * [-1, 1].
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          
+          const double sumD = pid.dp + pid.dd + pid.di;
+          switch (pid.count % (3 * pid.WINDOW_SIZE)) {
+            case (0):
+              if (sumD > 0.05) {
+                pid.Kp = fabs(pid.Kp + pid.dp);
+                steer_value = pid.Run(cte);
+                avg_error = pid.AverageError();
+                // Here we evaluate the decision taken 100 time steps ago - for Kd
+                // The evaluation for Kp would be done in the next case statement
+                if (avg_error < pid.best_average) {
+                  pid.best_average = avg_error;
+                  pid.dd *= 1.1;
+                } else {
+                  pid.Kd = fabs(pid.Kd - 2 * pid.dd);
+                  pid.dd *= 0.9;
+                }
+              } else {
+                steer_value = pid.Run(cte);
+                avg_error = pid.AverageError();
+              }
+              break;
+            case (50):
+              if (sumD > 0.05) {
+                pid.Ki = fabs(pid.Ki + pid.di);
+                steer_value = pid.Run(cte);
+                avg_error = pid.AverageError();
+                if (avg_error < pid.best_average) {
+                  pid.best_average = avg_error;
+                  pid.dp *= 1.1;
+                } else {
+                  pid.Kp = fabs(pid.Kp - 2 * pid.dp);
+                  pid.dp *= 0.9;
+                }
+              } else {
+                steer_value = pid.Run(cte);
+                avg_error = pid.AverageError();
+              }
+              break;
+            case (150):
+              if (sumD > 0.05) {
+                pid.Kd = fabs(pid.Kd + pid.dd);
+                steer_value = pid.Run(cte);
+                avg_error = pid.AverageError();
+                if (avg_error < pid.best_average) {
+                  pid.best_average = avg_error;
+                  pid.di *= 1.1;
+                } else {
+                  pid.Ki = fabs(pid.Ki - 2 * pid.di);
+                  pid.di *= 0.9;
+                }
+              } else {
+                steer_value = pid.Run(cte);
+                avg_error = pid.AverageError();
+              };
+            default:
+              steer_value = pid.Run(cte);
+              avg_error = pid.AverageError();
+          }
+
+          // throttle = 0.3 + 0.5 * (1 - fabs(steer_value));
+          throttle = 0.18 + 0.5 * (1 - fabs(steer_value)) + 1.0/5.0 * fabs(cte) - 5.0 * (cte - pid.prev_cte) + (2.5 * (0.2 - fmin(avg_error,0.4)));
+          throttle = fmax(fmin(throttle, 1.0), 0.0);
+          // throttle = .3;
+
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          std::cout << "Error: " << pid.TotalError() << ", " << avg_error << ", " << pid.best_average << std::endl;
+          std::cout << "Kp, Ki, Kd : " << pid.Kp << ", " << pid.Ki << ", " << pid.Kd << std::endl;
+          std::cout << "dp, di, dd : " << pid.dp << ", " << pid.di << ", " << pid.dd << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
