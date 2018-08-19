@@ -52,7 +52,8 @@ the point where the controller cannot handle curves and will drive off the track
 A tol value of 0.05 is a good stopping point for this track.
 
 
-[Watch PID with twiddle youtube video here![watch video here](https://img.youtube.com/vi/w0rLFDO_GqY/0.jpg)](https://youtu.be/w0rLFDO_GqY)
+[Watch PID with twiddle youtube video here![watch video here]
+(https://img.youtube.com/vi/w0rLFDO_GqY/0.jpg)](https://youtu.be/w0rLFDO_GqY)
 
 
 3. Fastest lap by controlling throttle (speed)
@@ -79,7 +80,8 @@ fmin(avg_error, E) is to put a ceiling value of E, to prevent cases of extreme h
 
 Final values for A = 0.18, B = 0.5, C = 0.2, D = 2.5, E = 0.4
 
-[Watch PID with steer and throttle PID video here![watch video here](https://img.youtube.com/vi/eYKSPCYi4fA/0.jpg)](https://youtu.be/eYKSPCYi4fA)
+[Watch PID with steer and throttle PID video here![watch video here]
+(https://img.youtube.com/vi/eYKSPCYi4fA/0.jpg)](https://youtu.be/eYKSPCYi4fA)
 
 
 ## Implementation tips
