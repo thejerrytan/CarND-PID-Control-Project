@@ -52,36 +52,34 @@ the point where the controller cannot handle curves and will drive off the track
 A tol value of 0.05 is a good stopping point for this track.
 
 
-[Watch PID with twiddle youtube video here![watch video here]
-(https://img.youtube.com/vi/w0rLFDO_GqY/0.jpg)](https://youtu.be/w0rLFDO_GqY)
+[Watch PID with twiddle youtube video here![watch video here](https://img.youtube.com/vi/w0rLFDO_GqY/0.jpg)](https://youtu.be/w0rLFDO_GqY)
 
 
 3. Fastest lap by controlling throttle (speed)
 
 I designed my own PID controller for throttle based on the formula below.
 
-3.1 throttle = bias + steer_factor + p - d + i
+throttle = bias + steer_factor + p - d + i
 
-3.2 bias = constant term
+bias = constant term
 
-3.3 steer_factor = A * (1 - |steer_value|), if driving straight should go fast, if turning, should slow down
+steer_factor = A * (1 - |steer_value|), if driving straight should go fast, if turning, should slow down
 
-3.4 p = B * |cte| - speed should be proportional to cte, assuming steer_value is correct, the further away 
+p = B * |cte| - speed should be proportional to cte, assuming steer_value is correct, the further away 
 you are from the trajectory, the faster you should correct yourself
 
-3.5 d = C * (delta cte), differential term. If cte increases (at a turn for e.g.) should slow down, 
+d = C * (delta cte), differential term. If cte increases (at a turn for e.g.) should slow down, 
 if cte decreases (straight road) should speed up
 
-3.6 i = D * (longTermAverageError - fmin(avg_error, E)), integral term. If current cte average over last 50 time steps is low, 
+i = D * (longTermAverageError - fmin(avg_error, E)), integral term. If current cte average over last 50 time steps is low, 
 I should speed up. If current cte average is high, slow down. 
 fmin(avg_error, E) is to put a ceiling value of E, to prevent cases of extreme high error at the beginning from setting throttle to 0.
 
-3.7 Hyperparameters A, B, C, D, E are tweaked by hand, longTermAverageError from observations.
+Hyperparameters A, B, C, D, E are tweaked by hand, longTermAverageError from observations.
 
 Final values for A = 0.18, B = 0.5, C = 0.2, D = 2.5, E = 0.4
 
-[Watch PID with steer and throttle PID video here![watch video here]
-(https://img.youtube.com/vi/eYKSPCYi4fA/0.jpg)](https://youtu.be/eYKSPCYi4fA)
+[Watch PID with steer and throttle PID video here![watch video here](https://img.youtube.com/vi/eYKSPCYi4fA/0.jpg)](https://youtu.be/eYKSPCYi4fA)
 
 
 ## Implementation tips
