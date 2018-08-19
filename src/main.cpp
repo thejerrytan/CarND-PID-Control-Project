@@ -124,10 +124,19 @@ int main()
               avg_error = pid.AverageError();
           }
 
-          // throttle = 0.3 + 0.5 * (1 - fabs(steer_value));
+          // throttle = bias + steer_factor + p - d + i
+          // bias -> constant term
+          // steer_factor -> A * (1 - |steer_value|), if driving straight should go fast, if turning, should slow down
+          // p -> B * |cte| - speed should be proportional to cte, assuming steer_value is correct, the further away
+          //      you are from the trajectory, the faster you should correct yourself
+          // d -> C * (delta cte), differential term. If cte increases (at a turn for e.g.) should slow down,
+          //      if cte decreases (straight road) should speed up
+          // i -> D * (longTermAverageError - fmin(avg_error, E)), integral term. If current cte average over last 50 time steps is low,
+          //      I should speed up. If current cte average is high, slow down.
+          //      fmin(avg_error, E) is to put a ceiling value of E, to prevent cases of extreme high error at the beginning from setting throttle to 0.
+          // Hyperparameters A, B, C, D, E are tweaked by hand, longTermAverageError from observations.
           throttle = 0.18 + 0.5 * (1 - fabs(steer_value)) + 1.0/5.0 * fabs(cte) - 5.0 * (cte - pid.prev_cte) + (2.5 * (0.2 - fmin(avg_error,0.4)));
           throttle = fmax(fmin(throttle, 1.0), 0.0);
-          // throttle = .3;
 
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
