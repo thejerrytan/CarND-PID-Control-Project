@@ -5,7 +5,7 @@ Self-Driving Car Engineer Nanodegree Program
 
 All video files referenced below are in the videos folder.
 
-1.Without twiddle, finding out good initial values for Kp, Ki and Kd
+### Without twiddle, finding out good initial values for Kp, Ki and Kd
 
 I know that the road ledge corresponds to about 5 cte (cross-track-error). The vehicle 
 should never approach the ledge. Steer values should be [-1, 1]. Thus, a good 
@@ -37,7 +37,7 @@ Setting Ki to a reasonable value like 0.005 allows the car to keep to the center
 while turning.
 See the video file at pid_p_0.2_i_0.005_d_5.mov.
 
-2. Initialize using the values found above, optimize using Twiddle
+### Initialize using the values found above, optimize using Twiddle
 
 With initial Kp = 0.2, Ki = 0.005, Kd = 5, dp = 0.02, di = 0.0005, dd = 0.5,
 I ran the twiddle algorithm for optimizing hyperparameters until sum of dp, di, dd <
@@ -55,7 +55,7 @@ A tol value of 0.05 is a good stopping point for this track.
 [Watch PID with twiddle youtube video here![watch video here](https://img.youtube.com/vi/w0rLFDO_GqY/0.jpg)](https://youtu.be/w0rLFDO_GqY)
 
 
-3. Fastest lap by controlling throttle (speed)
+### Fastest lap by controlling throttle (speed)
 
 I designed my own PID controller for throttle based on the formula below.
 
